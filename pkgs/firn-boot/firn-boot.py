@@ -20,6 +20,10 @@ import sys
 import zlib
 
 BOARD = b'apple,j713'
+BOARDS = {
+    BOARD: 'dtbs/apple/t8132-j713.dtb',
+    b'apple,j773g': 'dtbs/apple/t8132-j773g.dtb',
+}
 BOOTARGS = b'chosen.bootargs='
 GZIP = b'\x1f\x8b\x08'
 FDT_MAGIC = b'\xd0\x0d\xfe\xed'
@@ -34,7 +38,7 @@ TRAILER = 'TRAILER!!!'
 MARGIN = 1 << 20
 STORE = '/nix/store/'
 BOOT_DIR = 'm1n1'
-DTB = 'dtbs/apple/t8132-j713.dtb'
+DTB = BOARDS[BOARD]
 ORIGINAL = 'boot.bin.original'
 PREVIOUS = 'boot.bin.previous'
 
@@ -71,6 +75,58 @@ def fdt_size(data, offset):
             structure < total and strings < total):
         return None
     return total
+
+
+def board_from_compatible(compatible):
+    matches = [board for board in BOARDS if board in compatible.split(b'\0')]
+    require(len(matches) == 1, 'Expected exactly one supported board: apple,j713 or apple,j773g')
+    return matches[0]
+
+
+def dtb_board(dtb):
+    """Read the root compatible property, never a child node or an arbitrary string."""
+    require(fdt_size(dtb, 0) == len(dtb), 'Devicetree is not one flattened devicetree')
+    _, _, position, strings, _, _, _, _, strings_size, structure_size = struct.unpack_from('>10I', dtb)
+    end = position + structure_size
+    require(end <= len(dtb) and strings + strings_size <= len(dtb), 'Invalid devicetree blocks')
+    names = dtb[strings:strings + strings_size]
+    compatible, depth, started = None, 0, False
+    while position + 4 <= end:
+        token, = struct.unpack_from('>I', dtb, position)
+        position += 4
+        if token == 1:  # FDT_BEGIN_NODE
+            name_end = dtb.find(b'\0', position, end)
+            require(name_end >= position, 'Unterminated devicetree node name')
+            if not started:
+                require(name_end == position, 'Invalid devicetree root')
+                started = True
+            else:
+                require(depth > 0, 'Multiple devicetree roots')
+            position = (name_end + 4) & ~3
+            depth += 1
+        elif token == 2:  # FDT_END_NODE
+            require(depth > 0, 'Unbalanced devicetree nodes')
+            depth -= 1
+        elif token == 3:  # FDT_PROP
+            require(depth > 0 and position + 8 <= end, 'Invalid devicetree property')
+            length, name = struct.unpack_from('>II', dtb, position)
+            position += 8
+            name_end = names.find(b'\0', name)
+            require(name < len(names) and name_end >= name and position + length <= end,
+                    'Invalid devicetree property bounds')
+            if depth == 1 and names[name:name_end] == b'compatible':
+                require(compatible is None, 'Duplicate root compatible property')
+                compatible = dtb[position:position + length]
+            position = (position + length + 3) & ~3
+        elif token == 4:  # FDT_NOP
+            pass
+        elif token == 9:  # FDT_END
+            require(started and depth == 0 and compatible is not None and compatible.endswith(b'\0'),
+                    'Missing root compatible property or incomplete devicetree')
+            return board_from_compatible(compatible)
+        else:
+            raise Refused('Unknown devicetree token')
+    raise Refused('Incomplete devicetree structure')
 
 
 def parse_at(data, start):
@@ -173,7 +229,9 @@ def bootargs_line(args, init):
 def compose(current, loader, kernel, dtb, initrd, args, init):
     """Return (new boot.bin bytes, report lines): the generation's parts with
     the firmware from the current boot.bin."""
-    _, firmware = split_initramfs(parse(current)['initramfs'])
+    layout = parse(current)
+    current_board = dtb_board(layout['dtb'])
+    _, firmware = split_initramfs(layout['initramfs'])
     names = check_firmware(firmware)
     require(len(firmware) <= LIMITS['firmware'], 'The firmware archive is too large')
 
@@ -182,7 +240,8 @@ def compose(current, loader, kernel, dtb, initrd, args, init):
     require(len(kernel) <= LIMITS['kernel'], 'The kernel is larger than the installer allows')
     require(fdt_size(dtb, 0) == len(dtb), 'Devicetree is not one flattened devicetree')
     require(len(dtb) <= LIMITS['dtb'], 'The devicetree is larger than the installer allows')
-    require(BOARD + b'\0' in dtb, 'Devicetree is not for apple,j713')
+    require(dtb_board(dtb) == current_board,
+            'Devicetree does not match the installed board ' + current_board.decode())
     require(initrd[:3] == GZIP and gzip_end(initrd, 0) == len(initrd),
             'The initrd must be one gzip member (boot.initrd.compressor = "gzip")')
     require(len(initrd) <= LIMITS['initrd'], 'The initrd is larger than the installer allows')
@@ -238,11 +297,10 @@ def sync_dir(path):
 def check_board(sys_root):
     compatible = Path(sys_root, 'proc/device-tree/compatible')
     require(compatible.is_file(), 'Cannot read the running board from ' + str(compatible))
-    require(BOARD + b'\0' in compatible.read_bytes() + b'\0',
-            'This is not a 13-inch M4 MacBook Air (apple,j713)')
+    return board_from_compatible(compatible.read_bytes())
 
 
-def read_toplevel(toplevel):
+def read_toplevel(toplevel, board=BOARD):
     # init= must name the store path, not the profile link.
     toplevel = Path(os.path.realpath(toplevel))
     require(str(toplevel).startswith(STORE), f'{toplevel} is not a NixOS generation in {STORE}')
@@ -250,7 +308,7 @@ def read_toplevel(toplevel):
     return {
         'loader': (toplevel / 'm1n1.bin').read_bytes(),
         'kernel': (toplevel / 'kernel').read_bytes(),
-        'dtb': (toplevel / DTB).read_bytes(),
+        'dtb': (toplevel / BOARDS[board]).read_bytes(),
         'initrd': (toplevel / 'initrd').read_bytes(),
         'args': (toplevel / 'kernel-params').read_text().split(),
         'init': str(toplevel / 'init'),
@@ -258,12 +316,14 @@ def read_toplevel(toplevel):
 
 
 def install(args):
-    if args.apply:
-        check_board(args.sys_root)
+    running_board = check_board(args.sys_root) if args.apply else None
     boot = Path(args.efi, BOOT_DIR, 'boot.bin')
     require(boot.is_file() and not boot.is_symlink(), f'{boot} is missing (is the ESP mounted at {args.efi}?)')
     current = boot.read_bytes()
-    data, report = compose(current, **read_toplevel(args.toplevel))
+    board = dtb_board(parse(current)['dtb'])
+    require(running_board is None or running_board == board,
+            'Installed boot.bin does not match the running board')
+    data, report = compose(current, **read_toplevel(args.toplevel, board))
     print('\n'.join(report))
     if data == current:
         print('boot.bin is already this generation')

@@ -1,5 +1,5 @@
 {
-  description = "Firn: NixOS on the 13-inch M4 MacBook Air (J713)";
+  description = "Firn: NixOS on the M4 MacBook Air (J713) and Mac mini (J773G)";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
@@ -12,6 +12,10 @@
       ];
       forAll = f: nixpkgs.lib.genAttrs systems (system: f nixpkgs.legacyPackages.${system});
       minimal = self.nixosConfigurations.minimal;
+      boards = [
+        "j713"
+        "j773g"
+      ];
 
       aarch64From =
         system:
@@ -23,13 +27,23 @@
     {
       nixosModules.default = ./modules;
 
-      nixosConfigurations.minimal = nixpkgs.lib.nixosSystem {
-        modules = [
-          self.nixosModules.default
-          ./examples/minimal/configuration.nix
-          { nixpkgs.hostPlatform = "aarch64-linux"; }
-        ];
-      };
+      nixosConfigurations =
+        nixpkgs.lib.genAttrs boards (
+          board:
+          nixpkgs.lib.nixosSystem {
+            modules = [
+              self.nixosModules.default
+              ./examples/minimal/configuration.nix
+              {
+                nixpkgs.hostPlatform = "aarch64-linux";
+                hardware.firn.board = board;
+              }
+            ];
+          }
+        )
+        // {
+          minimal = self.nixosConfigurations.j713;
+        };
 
       packages = forAll (
         pkgs:
@@ -44,7 +58,14 @@
             nixos = minimal;
             inherit (packages) installer;
           };
+          kit-j713 = packages.kit;
+          kit-j773g = pkgs.callPackage ./pkgs/kit {
+            nixos = self.nixosConfigurations.j773g;
+            inherit (packages) installer;
+          };
           minimal = minimal.config.system.build.toplevel;
+          minimal-j713 = packages.minimal;
+          minimal-j773g = self.nixosConfigurations.j773g.config.system.build.toplevel;
           mesa = minimal.config.hardware.firn.mesa;
           linux = aarch64.callPackage ./pkgs/linux { kernelPatches = [ ]; };
           m1n1-stage1 = aarch64.callPackage ./pkgs/m1n1 { stage = 1; };
@@ -62,6 +83,11 @@
           policy = import ./tests/policy.nix {
             inherit pkgs;
             nixos = minimal;
+          };
+          policy-j713 = self.checks.${pkgs.stdenv.hostPlatform.system}.policy;
+          policy-j773g = import ./tests/policy.nix {
+            inherit pkgs;
+            nixos = self.nixosConfigurations.j773g;
           };
           kernel-modules = import ./tests/kernel-modules.nix {
             inherit pkgs;

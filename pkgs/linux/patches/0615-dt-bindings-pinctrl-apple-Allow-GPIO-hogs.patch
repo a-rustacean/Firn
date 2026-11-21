@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: OpenAI GPT-6.1 Sol <noreply@openai.com>
+Date: Fri, 20 Nov 2026 12:00:00 +0000
+Subject: [PATCH] dt-bindings: pinctrl: apple: Allow GPIO hogs
+
+The M4 Mac mini holds its permanently attached USB3 hub out of reset
+using GPIO hogs. Permit hog nodes alongside pinmux nodes and require
+the standard gpio-hog property; the common GPIO schema validates their
+contents. No driver-specific GPIO ABI is needed.
+
+Assisted-by: LLM
+---
+ Documentation/devicetree/bindings/pinctrl/apple,pinctrl.yaml | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/pinctrl/apple,pinctrl.yaml b/Documentation/devicetree/bindings/pinctrl/apple,pinctrl.yaml
+index f2eac9b..da58388 100644
+--- a/Documentation/devicetree/bindings/pinctrl/apple,pinctrl.yaml
++++ b/Documentation/devicetree/bindings/pinctrl/apple,pinctrl.yaml
+@@ -75,6 +75,11 @@ properties:
+     maxItems: 1
+ 
+ patternProperties:
++  '-hog(-[0-9]+)?$':
++    type: object
++    required:
++      - gpio-hog
++
+   '-pins$':
+     type: object
+     $ref: pinmux-node.yaml#

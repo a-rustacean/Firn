@@ -1,0 +1,77 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: OpenAI GPT-6.1 Sol <noreply@openai.com>
+Date: Fri, 20 Nov 2026 12:00:00 +0000
+Subject: [PATCH] dt-bindings: phy: apple,atcphy: Describe fixed USB3 links
+
+The Mac mini (M4, 2024) connects ATC2 to a permanently attached USB3
+hub rather than a Type-C port controller. Describe the fixed host link
+and its optional swapped wiring, as used by Gravity Linux's driver.
+
+Require Type-C switches and a connector graph only for reversible
+connections. A fixed lane swap is meaningful only with a fixed link.
+
+Based on Gravity Linux commit 70bc0e4285f238f7bc6337f8b2a7af62a6b4a5bf.
+Link: https://github.com/GravityLinux/linux/commit/70bc0e4285f238f7bc6337f8b2a7af62a6b4a5bf
+
+Assisted-by: LLM
+---
+ .../devicetree/bindings/phy/apple,atcphy.yaml      | 31 +++++++++++++++++++---
+ 1 file changed, 28 insertions(+), 3 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/phy/apple,atcphy.yaml b/Documentation/devicetree/bindings/phy/apple,atcphy.yaml
+index d6162fd..d2c932b 100644
+--- a/Documentation/devicetree/bindings/phy/apple,atcphy.yaml
++++ b/Documentation/devicetree/bindings/phy/apple,atcphy.yaml
+@@ -28,6 +28,22 @@ description: >
+ 
+ allOf:
+   - $ref: /schemas/usb/usb-switch.yaml#
++  - if:
++      required:
++        - apple,fixed-usb3
++    then:
++      properties:
++        mode-switch: false
++        orientation-switch: false
++    else:
++      required:
++        - mode-switch
++        - orientation-switch
++        - ports
++
++dependentRequired:
++  apple,fixed-lane-swap:
++    - apple,fixed-usb3
+ 
+ $defs:
+   apple,tunable:
+@@ -85,6 +101,18 @@ properties:
+   mode-switch: true
+   orientation-switch: true
+ 
++  apple,fixed-usb3:
++    type: boolean
++    description: |
++      The PHY connects to a permanently attached, host-only USB3 device,
++      rather than a reversible Type-C connector. Configure the USB3 lanes
++      without waiting for Type-C mode or orientation notifications.
++
++  apple,fixed-lane-swap:
++    type: boolean
++    description: |
++      The permanently attached USB3 device uses the swapped lane routing.
++
+   power-domains:
+     maxItems: 1
+ 
+@@ -161,10 +189,7 @@ required:
+   - reg-names
+   - "#phy-cells"
+   - "#reset-cells"
+-  - orientation-switch
+-  - mode-switch
+   - power-domains
+-  - ports
+ 
+ additionalProperties: false
+ 

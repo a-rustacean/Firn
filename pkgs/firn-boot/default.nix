@@ -39,7 +39,7 @@ stdenvNoCC.mkDerivation {
   '';
 
   meta = {
-    description = "Write the J713 m1n1 boot.bin for a NixOS generation";
+    description = "Write the J713 or J773G m1n1 boot.bin for a NixOS generation";
     mainProgram = "firn-boot";
     platforms = lib.platforms.linux;
   };

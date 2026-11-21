@@ -1,0 +1,44 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: OpenAI GPT-6.1 Sol <noreply@openai.com>
+Date: Fri, 20 Nov 2026 12:00:00 +0000
+Subject: [PATCH] dt-bindings: usb: apple,dwc3: Allow fixed host mode
+
+Some Apple DWC3 controllers connect to permanently attached USB hubs,
+not to dual-role Type-C ports. A controller explicitly described as a
+host does not need a USB role switch. Keep requiring the switch for
+other configurations, including descriptions with no explicit dr_mode.
+
+Assisted-by: LLM
+---
+ Documentation/devicetree/bindings/usb/apple,dwc3.yaml | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/Documentation/devicetree/bindings/usb/apple,dwc3.yaml b/Documentation/devicetree/bindings/usb/apple,dwc3.yaml
+index f49e1a0..7abe392 100644
+--- a/Documentation/devicetree/bindings/usb/apple,dwc3.yaml
++++ b/Documentation/devicetree/bindings/usb/apple,dwc3.yaml
+@@ -15,6 +15,16 @@ description:
+ 
+ allOf:
+   - $ref: snps,dwc3-common.yaml#
++  - if:
++      not:
++        properties:
++          dr_mode:
++            const: host
++        required:
++          - dr_mode
++    then:
++      required:
++        - usb-role-switch
+ 
+ properties:
+   compatible:
+@@ -58,7 +68,6 @@ required:
+   - iommus
+   - resets
+   - power-domains
+-  - usb-role-switch
+ 
+ unevaluatedProperties: false
+ 

@@ -1,9 +1,10 @@
 # Firn installer kit
 
 Firn is an experimental NixOS for the 13-inch M4 MacBook Air (Mac16,12 /
-J713) only, with a minimal-risk profile: the parts that are not finished
-(speakers and others) stay off, and the CPUs and GPU are throttled where
-macOS holds them.
+J713) and M4 Mac mini (Mac16,10 / J773G). Each kit targets one board;
+`board` names it and the launcher checks your model. Unfinished audio stays
+off. Installation and boot have been reported working on the mini; the Air
+retains its existing CPU and GPU thermal limits.
 
 The installer is Gravity Linux's installer with the J713 added, built by
 the Firn project. Firn is not made, endorsed or supported by Gravity
@@ -16,7 +17,7 @@ Before installing:
    beside it, which the Air needs to boot Linux.
 3. Read GUIDE.md in this folder, on another device, before you start.
 
-Then, in Terminal on the Air:
+Then, in Terminal on the target Mac:
 
 ```sh
 bash preflight.command

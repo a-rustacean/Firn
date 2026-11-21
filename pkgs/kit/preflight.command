@@ -26,8 +26,14 @@ if [[ $(uname -s) == Darwin && $(uname -m) == arm64 ]]; then ok 'native arm64 ma
 else bad 'not native arm64 macOS'; fi
 
 model=$(/usr/sbin/sysctl -n hw.model 2>/dev/null)
-if [[ "$model" == Mac16,12 ]]; then ok "model $model (13-inch M4 Air, J713)"
-else bad "model $model is not Mac16,12"; fi
+case "$model" in
+  Mac16,12) board=j713; ok "model $model (13-inch M4 Air, J713)" ;;
+  Mac16,10) board=j773g; ok "model $model (M4 Mac mini, J773G)" ;;
+  *) board=unknown; bad "model $model is not Mac16,12 or Mac16,10" ;;
+esac
+if [[ -f "$kit/board" && $(cat "$kit/board") != "$board" ]]; then
+  bad 'this installer kit targets a different board'
+fi
 
 macos=$(/usr/bin/sw_vers -productVersion)
 if version_ge "$macos" 26.5; then ok "macOS $macos (26.5 or newer)"; else bad "macOS $macos is older than 26.5"; fi

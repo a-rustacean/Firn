@@ -7,7 +7,7 @@ let
   inherit (pkgs) lib;
   patches = ../pkgs/linux/patches;
   src = pkgs.applyPatches {
-    name = "linux-j713-source";
+    name = "linux-t8132-source";
     inherit (kernel) src;
     patches = map (name: patches + "/${name}") (lib.attrNames (builtins.readDir patches));
   };
@@ -27,24 +27,32 @@ let
     "apple,sio.yaml"
     "apple,spmi-nvmem.yaml"
     "apple,atcphy.yaml"
+    "apple,pinctrl.yaml"
     "apple,pmp.yaml"
     "apple,pmp-report.yaml"
     "ti,tps6598x.yaml"
   ];
   # Nodes whose bindings are not written yet (docs/TODO.md).
-  expected = pkgs.writeText "expected-warnings" ''
-    /soc/dcp@30ae00000/panel: failed to match any schema with compatible: ['apple,panel-j713', 'apple,panel']
+  commonWarnings = ''
     /soc/dcp@30ae00000: failed to match any schema with compatible: ['apple,t8132-dcp', 'apple,dcp']
     /soc/fifo@394b14000: failed to match any schema with compatible: ['apple,t8132-dockchannel', 'apple,dockchannel']
     /soc/fifo@394b14000/input@0: failed to match any schema with compatible: ['apple,t8132-dockchannel-hid', 'apple,dockchannel-hid']
     /soc/mtp@394600000: failed to match any schema with compatible: ['apple,t8132-mtp', 'apple,t8132-rtk-helper-asc4', 'apple,mtp', 'apple,rtk-helper-asc4']
     /soc/phy@39a700000: failed to match any schema with compatible: ['apple,t8132-dptx-phy', 'apple,dptx-phy']
   '';
+  expectedAir = pkgs.writeText "expected-j713-warnings" (
+    commonWarnings
+    + ''
+      /soc/dcp@30ae00000/panel: failed to match any schema with compatible: ['apple,panel-j713', 'apple,panel']
+    ''
+  );
+  expectedMini = pkgs.writeText "expected-j773g-warnings" commonWarnings;
 in
 pkgs.runCommandCC "firn-devicetree-schema"
   {
     nativeBuildInputs = with pkgs; [
       bison
+      dtc
       flex
       gnumake
       python3Packages.dtschema
@@ -62,18 +70,28 @@ pkgs.runCommandCC "firn-devicetree-schema"
     # Linux 7.3 gives ti,irqs-reserved two types in these TI bindings, and
     # dtschema crashes reporting it; neither concerns an Apple devicetree.
     rm Documentation/devicetree/bindings/interrupt-controller/ti,{pruss-intc,irq-crossbar}.yaml
-    if ! {
-      make -s ARCH=arm64 dt_binding_check DT_SCHEMA_FILES=${bindings}
-      make -s ARCH=arm64 CHECK_DTBS=y apple/t8132-j713.dtb
-    } > ../output 2>&1; then
-      cat ../output >&2
+    if ! make -s ARCH=arm64 dt_binding_check DT_SCHEMA_FILES=${bindings} > ../binding-output 2>&1; then
+      cat ../binding-output >&2
       exit 1
     fi
-    sed -e "s|$PWD/||g" -e 's|^arch/arm64/boot/dts/apple/t8132-j713.dtb: ||' ../output \
-      | grep -E '^(/soc|Documentation|t8132-j713|[a-z].*@[0-9a-f]+ \()' | sort -u > ../warnings
-    if ! diff -u <(sort -u ${expected}) ../warnings; then
-      echo "dt-schema reports warnings beyond the expected ones." >&2
-      exit 1
-    fi
-    cp ../warnings $out
+    mkdir -p $out
+    for board in j713 j773g; do
+      cp ../binding-output ../output
+      if ! make -s ARCH=arm64 CHECK_DTBS=y apple/t8132-$board.dtb >> ../output 2>&1; then
+        cat ../output >&2
+        exit 1
+      fi
+      sed -e "s|$PWD/||g" -e "s|^arch/arm64/boot/dts/apple/t8132-$board.dtb: ||" ../output \
+        | grep -E '^(/soc|Documentation|t8132-(j713|j773g)|[a-z].*@[0-9a-f]+ \()' | sort -u > ../warnings
+      case "$board" in
+        j713) expected=${expectedAir} ;;
+        j773g) expected=${expectedMini} ;;
+      esac
+      if ! diff -u <(sort -u "$expected") ../warnings; then
+        echo "dt-schema reports unexpected warnings for $board." >&2
+        exit 1
+      fi
+      cp ../warnings $out/$board
+    done
+    python3 ${./check-devicetrees.py} arch/arm64/boot/dts/apple
   ''

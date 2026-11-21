@@ -1,0 +1,132 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Niklas Sheth <hi@niklassheth.com>
+Date: Fri, 20 Nov 2026 12:00:00 +0000
+Subject: [PATCH] arm64: dts: apple: j773g: Add GPU and PMP handoff
+
+Include the common M4 GPU description and provide the PMP alias used by
+m1n1 to supply its configuration. Enable the PMP transport and retain
+the startup report votes used by Gravity Linux on the Mac mini.
+
+Leave the GPU, its reserved-memory placeholders and PMP itself disabled
+until the bootloader has supplied their firmware state. Do not import
+a fixed physical ramoops reservation or laptop thermal limits. The
+existing SoC-level always-on AGX vote protects PMP when no GPU is bound.
+SIO is deliberately not voted before PMP starts.
+
+Based on Gravity Linux commits c1d54471b5ea (GPU), 238d1053955f (PMP),
+262812702fc5 (activity votes) and 3d28fd11e212 (SIO startup).
+Signed-off-by: Niklas Sheth <hi@niklassheth.com>
+[Firn: reuse shared nodes; retain bootloader-gated firmware enablement.]
+Link: https://github.com/GravityLinux/linux/commit/c1d54471b5ea8049eacf032b4bfb36eba65192b4
+Link: https://github.com/GravityLinux/linux/commit/238d1053955ff7d5d00e0300ac53a8f855dd0ad4
+Link: https://github.com/GravityLinux/linux/commit/3d28fd11e212caaa34901985daa61cdf75bc27b7
+
+Assisted-by: LLM
+---
+ arch/arm64/boot/dts/apple/t8132-j773g.dts | 79 +++++++++++++++++++++++++++++++
+ 1 file changed, 79 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t8132-j773g.dts b/arch/arm64/boot/dts/apple/t8132-j773g.dts
+index aa4dfa8..e2d19f9 100644
+--- a/arch/arm64/boot/dts/apple/t8132-j773g.dts
++++ b/arch/arm64/boot/dts/apple/t8132-j773g.dts
+@@ -12,6 +12,7 @@
+ #include "t8132.dtsi"
+ #include "t8132-jxxx.dtsi"
+ #include "t8132-gpu.dtsi"
++#include "t8132-gpu.dtsi"
+ 
+ / {
+ 	compatible = "apple,j773g", "apple,t8132", "apple,arm-platform";
+@@ -19,6 +20,7 @@ / {
+ 
+ 	aliases {
+ 		ethernet0 = &ethernet0;
++		pmp = &pmp;
+ 	};
+ };
+ 
+@@ -193,6 +195,83 @@ &pcie2_dart {
+ 	status = "okay";
+ };
+ 
++&pmp_dart {
++	status = "okay";
++};
++
++&pmp_mbox {
++	status = "okay";
++};
++
++&pmp_report {
++	status = "okay";
++};
++
++/* Keep votes for blocks whose drivers do not report their activity yet. */
++&pmp_report_ans {
++	apple,always-on;
++};
++
++&pmp_report_atc0_common {
++	apple,always-on;
++};
++
++&pmp_report_atc1 {
++	apple,always-on;
++};
++
++&pmp_report_atc2 {
++	apple,always-on;
++};
++
++&pmp_report_atc3_common {
++	apple,always-on;
++};
++
++&pmp_report_boot_f {
++	apple,always-on;
++};
++
++&pmp_report_boot_10 {
++	apple,always-on;
++};
++
++&pmp_report_boot_18 {
++	apple,always-on;
++};
++
++&pmp_report_disp {
++	apple,always-on;
++};
++
++&pmp_report_dispext1 {
++	apple,always-on;
++};
++
++&pmp_report_pcie {
++	apple,always-on;
++};
++
++&pmp_report_soc_ni0 {
++	apple,always-on;
++};
++
++&pmp_report_soc_ni1 {
++	apple,always-on;
++};
++
++&pmp_report_soc_ni3 {
++	apple,always-on;
++};
++
++&pmp_report_soc_ni4 {
++	apple,always-on;
++};
++
++&pmp_report_soc_ni5 {
++	apple,always-on;
++};
++
+ &port02 {
+ 	bus-range = <2 2>;
+ 	status = "okay";

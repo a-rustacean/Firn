@@ -35,7 +35,7 @@ in
   config = lib.mkIf cfg.enable {
     hardware.deviceTree = {
       enable = true;
-      filter = "t8132-j713.dtb";
+      filter = "t8132-${cfg.board}.dtb";
     };
 
     system.systemBuilderCommands = ''
@@ -43,7 +43,7 @@ in
     '';
 
     boot.initrd.systemd.enable = true;
-    # The Air has no TPM the kernel can reach.
+    # Neither board has a TPM the kernel can reach.
     boot.initrd.systemd.tpm2.enable = false;
     # The installer and firn-boot require a gzip initrd.
     boot.initrd.compressor = "gzip";

@@ -16,7 +16,16 @@
   ];
 
   options.hardware.firn = {
-    enable = lib.mkEnableOption "NixOS on the 13-inch M4 MacBook Air (J713)";
+    enable = lib.mkEnableOption "NixOS on the M4 MacBook Air (J713) or Mac mini (J773G)";
+
+    board = lib.mkOption {
+      type = lib.types.enum [
+        "j713"
+        "j773g"
+      ];
+      default = "j713";
+      description = "Target board: the 13-inch M4 MacBook Air or the M4 Mac mini.";
+    };
 
     efiMountPoint = lib.mkOption {
       type = lib.types.str;
@@ -59,7 +68,7 @@
     };
   };
 
-  # Packages built on buildSystem for the Air: the kernel and m1n1.
+  # Packages built on buildSystem for either board: the kernel and m1n1.
   config._module.args.firnCrossPkgs = import pkgs.path {
     localSystem = config.hardware.firn.buildSystem;
     crossSystem = pkgs.stdenv.hostPlatform.system;

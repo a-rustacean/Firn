@@ -66,7 +66,7 @@ in
         [ "$(cat /var/lib/firn/installer/gravity/installer.log)" = firn-test-installer-data ]
         [ -s /var/lib/firn/installer/vendorfw/manifest.txt ]'
       check "firn-boot reads the installer boot.bin as this generation" 'firn-boot install /run/current-system --efi "$efi" | tee /dev/stderr | grep -q "already this generation"'
-      check "firn-boot refuses to write on a board that is not J713" '
+      check "firn-boot refuses to write on an unsupported board" '
         before=$(sha256sum "$efi/m1n1/boot.bin")
         ! firn-boot install /run/current-system --efi "$efi" --apply 2>/tmp/err
         grep -q "apple,j713" /tmp/err

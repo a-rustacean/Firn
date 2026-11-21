@@ -8,6 +8,11 @@ let
   sleep = cfg.systemd.sleep.settings.Sleep;
 
   rules = {
+    "devicetree matches the selected board" =
+      cfg.hardware.deviceTree.filter == "t8132-${cfg.hardware.firn.board}.dtb";
+    "the Mac mini has both on-board Ethernet drivers" =
+      cfg.hardware.firn.board != "j773g"
+      || (kernel.config.CONFIG_TIGON3 or "n") == "m" && (kernel.config.CONFIG_AQTION or "n") == "m";
     "kernel is this repository's source build" = kernel.modDirVersion == "7.4.0-rc1-firn";
     "the kernel builds no speaker codec driver, nor Asahi's pre-M4 GPU driver" =
       lib.all

@@ -1,4 +1,9 @@
-{ lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 {
   # Machine-local, gitignored.
   imports = lib.optional (builtins.pathExists ./access.nix) ./access.nix;
@@ -11,7 +16,9 @@
     "flakes"
   ];
 
-  networking.hostName = "m4-air";
+  networking.hostName = lib.mkDefault (
+    if config.hardware.firn.board == "j713" then "m4-air" else "m4-mini"
+  );
   networking.wireless.iwd.enable = true;
   # Ethernet and Wi-Fi on one network otherwise fail DHCP's conflict check.
   boot.kernel.sysctl = {

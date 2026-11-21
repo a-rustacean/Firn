@@ -1,7 +1,11 @@
-# Installing Firn on your MacBook Air
+# Installing Firn on your M4 Mac
 
-For the 13-inch M4 MacBook Air (Mac16,12) only. This guide takes you from a
+For the 13-inch M4 MacBook Air (Mac16,12) or M4 Mac mini (Mac16,10). This guide takes you from a
 normal Mac to Firn (NixOS) beside macOS, and back again if you want.
+
+For the mini, build `kit-j773g` instead of `kit` below and use HDMI and a USB
+keyboard. Its new integration is not yet boot-tested. Charger, lid and
+Air-specific thermal instructions apply only to the Air.
 
 **Keep this guide on another device (phone or PC) while you install.** For
 part of the install the Mac is in recovery mode and cannot show it.
@@ -26,8 +30,9 @@ What can still go wrong, and why the backup matters:
   which is the other reason for the backup.
 
 Hardware risk is kept low: speakers and other unfinished parts are
-switched off and cannot be switched on by mistake, and thermal zones
-throttle the CPUs and the GPU where macOS holds them.
+switched off and cannot be switched on by mistake. On the Air, thermal zones
+throttle the CPUs and the GPU where macOS holds them; these laptop limits
+are not applied to the mini.
 
 ## Part 1: prepare (about an hour, mostly the backup)
 

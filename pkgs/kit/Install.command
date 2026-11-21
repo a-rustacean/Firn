@@ -13,9 +13,14 @@ echo 'Checking the kit. The OS package takes a minute; wait for its OK line.'
 (cd "$kit" && shasum -a 256 -c SHA256SUMS)
 [[ "${1:-}" == --verify-only ]] && exit 0
 
-[[ $(uname -s) == Darwin && $(uname -m) == arm64 ]] || { echo 'Run this from macOS on the Air.' >&2; exit 1; }
-[[ $(/usr/sbin/sysctl -n hw.model) == Mac16,12 ]] ||
-  { echo 'Firn supports only the 13-inch M4 MacBook Air (Mac16,12).' >&2; exit 1; }
+[[ $(uname -s) == Darwin && $(uname -m) == arm64 ]] || { echo 'Run this from native arm64 macOS.' >&2; exit 1; }
+case "$(cat "$kit/board")" in
+  j713) model=Mac16,12 ;;
+  j773g) model=Mac16,10 ;;
+  *) echo 'Unknown installer kit board.' >&2; exit 1 ;;
+esac
+[[ $(/usr/sbin/sysctl -n hw.model) == "$model" ]] ||
+  { echo "This kit is for $model; build the kit for your board instead." >&2; exit 1; }
 
 work=$(mktemp -d /private/tmp/firn-install.XXXXXXXX)
 tar -xzf "$kit/installer.tar.gz" -C "$work"

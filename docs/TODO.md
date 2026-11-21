@@ -24,6 +24,17 @@ in [ISSUES.md](ISSUES.md).
 - [ ] The GPU cooling device at the chassis zone's real trips (42 and
       45 C), under a long combined CPU and GPU load.
 
+## Check on the mini
+
+- [x] J773G installation and boot (user-reported, 21 November 2026).
+- [ ] J773G cold boot, HDMI modesetting/hotplug and sustained NVMe writes.
+- [ ] All five USB ports, both cable orientations on the rear ports, and
+      both the 1 Gb and 10 Gb Ethernet options.
+- [ ] Fixed-host DWC3 probe-failure and unbind cleanup before submission;
+      the existing glue/core teardown also needs review.
+- [ ] Wi-Fi/Bluetooth firmware selection, GPU rendering, PMP startup,
+      fan control and sustained-load temperatures. Do not apply Air limits.
+
 ## Workarounds to replace
 
 - [ ] Sleep, which needs every co-processor's power states understood.
@@ -90,6 +101,11 @@ in [ISSUES.md](ISSUES.md).
 
 ## Upstreaming
 
+- [ ] Review and human sign-off for the J773G additions (0614–0622),
+      including the new fixed-link/GPIO bindings and the unsigned original
+      PCIe description. Imported sign-offs describe the source commits,
+      not certification of Firn's adaptations. Hardware validation and the
+      existing display/GPU/PMP prerequisites are still needed upstream.
 - [ ] Bindings for the MTP, DockChannel, DockChannel HID, DCP and the J713
       panel; `checks.devicetree-schema` lists them as expected warnings.
 - [ ] Sign-offs from their authors, for commits that carry only Firn's:

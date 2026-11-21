@@ -20,11 +20,12 @@ if os.environ.get('PAYLOADS_PY'):
     spec.loader.exec_module(INSTALLER)
 
 
-def fdt(extra=b''):
-    """A minimal valid FDT whose strings carry the board name."""
-    strings = b'apple,j713\0' + extra
-    strings += b'\0' * (-len(strings) % 4)
-    structure = struct.pack('>II', 1, 0) + struct.pack('>II', 2, 9)
+def fdt(extra=b'', board=boot.BOARD):
+    """A minimal FDT with the board in the root compatible property."""
+    strings = b'compatible\0' + extra
+    value = board + b'\0apple,t8132\0apple,arm-platform\0'
+    structure = (struct.pack('>II', 1, 0) + struct.pack('>III', 3, len(value), 0)
+                 + value + bytes(-len(value) % 4) + struct.pack('>II', 2, 9))
     rsv = 40
     off_struct = rsv + 16
     off_strings = off_struct + len(structure)
@@ -148,6 +149,31 @@ class Compose(unittest.TestCase):
         with self.assertRaisesRegex(boot.Refused, 'apple,j713'):
             compose(dtb=fdt().replace(b'apple,j713', b'apple,j715'))
 
+    def test_mini_generation_parts_replaced(self):
+        mini = fdt(board=b'apple,j773g')
+        data, _ = compose(current=installed(dtb=mini), dtb=mini)
+        self.assertEqual(boot.parse(data)['dtb'], mini)
+        self.assertEqual(boot.split_initramfs(boot.parse(data)['initramfs'])[1], FIRMWARE)
+
+    def test_cannot_switch_between_supported_boards(self):
+        mini = fdt(board=b'apple,j773g')
+        for current, new in ((DTB, mini), (mini, DTB)):
+            with self.subTest(board=boot.dtb_board(current)):
+                with self.assertRaisesRegex(boot.Refused, 'does not match'):
+                    compose(current=installed(dtb=current), dtb=new)
+
+    def test_board_name_outside_root_compatible_is_not_accepted(self):
+        with self.assertRaises(boot.Refused):
+            boot.dtb_board(fdt(extra=b'apple,j713\0', board=b'apple,j715'))
+
+    def test_ambiguous_board_is_not_accepted(self):
+        with self.assertRaises(boot.Refused):
+            boot.dtb_board(fdt(board=b'apple,j713\0apple,j773g'))
+
+    def test_truncated_devicetree_structure_refused(self):
+        with self.assertRaises(boot.Refused):
+            boot.dtb_board(DTB[:-1])
+
     def test_oversized_loader_refused(self):
         with self.assertRaisesRegex(boot.Refused, 'too large'):
             compose(loader=b'\0' * (boot.LIMITS['loader'] + 1))
@@ -175,6 +201,13 @@ class InstallerContract(unittest.TestCase):
         expected = self.installer_bootbin(NEW_LOADER, NEW_KERNEL, NEW_DTB, NEW_INITRD,
                                           PARAMS + ' root=fstab init=/nix/store/x-nixos-system/init')
         self.assertEqual(data, expected)
+
+    def test_mini_installer_output_recomposes_unchanged(self):
+        mini = fdt(board=b'apple,j773g')
+        data = self.installer_bootbin(LOADER, KERNEL, mini, INITRD, INSTALLED_ARGS)
+        again, _ = boot.compose(data, LOADER, KERNEL, mini, INITRD, PARAMS.split() + ['root=fstab'],
+                                '/nix/store/a-nixos-system/init')
+        self.assertEqual(data, again)
 
 
 class Install(unittest.TestCase):
@@ -295,6 +328,45 @@ class Install(unittest.TestCase):
         status, _, err = self.run_tool('--apply')
         self.assertEqual(status, 1)
         self.assertIn('apple,j713', err)
+
+    def test_mini_apply_uses_mini_devicetree(self):
+        mini = fdt(board=b'apple,j773g')
+        self.boot.write_bytes(installed(dtb=mini))
+        (self.sys / 'proc/device-tree/compatible').write_bytes(b'apple,j773g\0apple,t8132\0')
+        (self.toplevel / boot.BOARDS[b'apple,j773g']).write_bytes(mini)
+        status, _, err = self.run_tool('--apply')
+        self.assertEqual(status, 0, err)
+        self.assertEqual(boot.parse(self.boot.read_bytes())['dtb'], mini)
+
+    def test_running_board_must_match_installed_board(self):
+        (self.sys / 'proc/device-tree/compatible').write_bytes(b'apple,j773g\0apple,t8132\0')
+        before = self.boot.read_bytes()
+        status, _, err = self.run_tool('--apply')
+        self.assertEqual(status, 1)
+        self.assertIn('does not match the running board', err)
+        self.assertEqual(self.boot.read_bytes(), before)
+        self.assertFalse((self.dir / 'boot.bin.original').exists())
+
+    def test_mini_cannot_use_air_only_generation(self):
+        mini = fdt(board=b'apple,j773g')
+        self.boot.write_bytes(installed(dtb=mini))
+        before = self.boot.read_bytes()
+        status, _, err = self.run_tool()
+        self.assertEqual(status, 1)
+        self.assertIn('t8132-j773g.dtb', err)
+        self.assertEqual(self.boot.read_bytes(), before)
+
+    def test_misnamed_devicetree_refused_before_writing(self):
+        mini = fdt(board=b'apple,j773g')
+        self.boot.write_bytes(installed(dtb=mini))
+        (self.sys / 'proc/device-tree/compatible').write_bytes(b'apple,j773g\0apple,t8132\0')
+        (self.toplevel / boot.BOARDS[b'apple,j773g']).write_bytes(NEW_DTB)
+        before = self.boot.read_bytes()
+        status, _, err = self.run_tool('--apply')
+        self.assertEqual(status, 1)
+        self.assertIn('does not match the installed board', err)
+        self.assertEqual(self.boot.read_bytes(), before)
+        self.assertFalse((self.dir / 'boot.bin.original').exists())
 
     def test_generation_without_m1n1_refused(self):
         (self.toplevel / 'm1n1.bin').unlink()

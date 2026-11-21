@@ -10,7 +10,7 @@ import shutil
 import sys
 import zipfile
 
-PACKAGE = 'firn-j713.zip'
+PACKAGE = 'firn-{board}.zip'
 # The display driver supports this firmware's DCP interface.
 STUB_FIRMWARE = '26.6.2'
 
@@ -48,6 +48,7 @@ def stand_in_firmware():
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--board', choices=('j713', 'j773g'), default='j713')
     for name in ('installer', 'installer-src', 'firn-boot', 'root-image', 'loader', 'kernel', 'dtb',
                  'initrd', 'kernel-params', 'init', 'os-name', 'install-command', 'preflight',
                  'start-here', 'guide', 'out'):
@@ -57,6 +58,10 @@ def main():
     out.mkdir()
 
     firn_boot = load('firn_boot', args.firn_boot)
+    board = ('apple,' + args.board).encode()
+    require(firn_boot.dtb_board(Path(args.dtb).read_bytes()) == board,
+            'devicetree does not match --board ' + args.board)
+    package_name = PACKAGE.format(board=args.board)
     sys.path.insert(0, str(Path(args.installer_src, 'src')))
     import osinstall
     import payloads
@@ -68,18 +73,18 @@ def main():
     parts = {
         'm1n1': ('boot/m1n1.bin', args.loader),
         'kernel': ('boot/Image.gz', args.kernel),
-        'dtb': ('boot/t8132-j713.dtb', args.dtb),
+        'dtb': (f'boot/t8132-{args.board}.dtb', args.dtb),
         'initramfs': ('boot/initramfs.cpio.gz', args.initrd),
     }
     root_bytes = os.path.getsize(args.root_image)
     require(root_bytes % (1 << 20) == 0, 'root image is not a whole number of MiB')
     entry = {
-        'name': args.os_name + ' (NixOS, experimental)',
+        'name': args.os_name + f' (NixOS, {args.board.upper()}, experimental)',
         'default_os_name': args.os_name,
         'expert': False,
         'boot_object': 'm1n1.bin',
         'next_object': 'm1n1/boot.bin',
-        'package': PACKAGE,
+        'package': package_name,
         'supported_fw': [STUB_FIRMWARE],
         'partitions': [
             {'name': 'EFI', 'type': 'EFI', 'size': '524288000B', 'format': 'fat',
@@ -103,7 +108,7 @@ def main():
     }
 
     (out / 'os').mkdir()
-    package = out / 'os' / PACKAGE
+    package = out / 'os' / package_name
     # ZIP dates start at 1980.
     with zipfile.ZipFile(package, 'x', compression=zipfile.ZIP_DEFLATED, compresslevel=1,
                          allowZip64=True, strict_timestamps=False) as archive:
@@ -137,8 +142,10 @@ def main():
         os.chmod(out / name, mode)
     (out / 'installer_data.json').write_text(
         json.dumps({'os_list': [entry, tethered]}, indent=2, sort_keys=True) + '\n')
+    (out / 'board').write_text(args.board + '\n')
 
-    report = json.dumps({'bootargs': bootargs, 'bootargs_length': len(bootargs), 'root_bytes': root_bytes,
+    report = json.dumps({'board': args.board, 'bootargs': bootargs,
+                         'bootargs_length': len(bootargs), 'root_bytes': root_bytes,
                          'package_sha256': sha(package),
                          'checks': ['OSInstaller.load_package', 'payloads.read', 'payloads.build',
                                     'firn-boot reproduces the installer boot.bin']},

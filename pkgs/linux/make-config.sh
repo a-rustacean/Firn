@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Generate the J713 kernel configuration from config/*.config on top of
+# Generate the shared J713/J773G configuration from config/*.config on top of
 # allnoconfig. Fails if any requested value does not survive, which
 # means a missing dependency or a renamed option. Pass the toolchain the
 # kernel is built with, since some options depend on it:

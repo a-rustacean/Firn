@@ -8,7 +8,7 @@
 
     # The gains power_allocator estimates for the hot spot limit-cycle
     # between 95 and 115 C. These hold it at 105 C with a single overshoot.
-    services.udev.extraRules = ''
+    services.udev.extraRules = lib.mkIf (config.hardware.firn.board == "j713") ''
       ACTION=="add", SUBSYSTEM=="thermal", KERNEL=="thermal_zone*", ATTR{type}=="cpu-thermal", ATTR{k_po}="205", ATTR{k_pu}="100", ATTR{k_i}="52"
     '';
 

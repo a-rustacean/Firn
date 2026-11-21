@@ -1,11 +1,11 @@
 # Firn
 
-NixOS on the 13-inch M4 MacBook Air (Mac16,12 / J713). Experimental and
-unofficial.
+NixOS on the 13-inch M4 MacBook Air (Mac16,12 / J713) and M4 Mac mini
+(Mac16,10 / J773G). Experimental and unofficial.
 
 Everything that runs on the Air is built from source here:
 
-- the kernel: mainline Linux with a J713-only patch series, each patch
+- the kernel: mainline Linux with shared T8132 and board-specific patches, each patch
   credited to its authors;
 - m1n1 stage 1 and stage 2: upstream m1n1 with Firn's patches;
 - Mesa: Gravity Linux's, whose asahi drivers support the M4's GPU;
@@ -16,7 +16,7 @@ both pinned by hash, as Asahi Linux's own installer does.
 
 ## What works
 
-Keyboard, trackpad, NVMe, Wi-Fi, Bluetooth, the power management
+On the Air: keyboard, trackpad, NVMe, Wi-Fi, Bluetooth, the power management
 coprocessor (PMP), the internal display through its display controller
 (DCP), with brightness and blanking, and the GPU: OpenGL, OpenGL ES,
 Vulkan and OpenCL through Gravity Linux's Mesa
@@ -24,6 +24,11 @@ Vulkan and OpenCL through Gravity Linux's Mesa
 GPU. Set `hardware.firn.wifiRegion` (for example `"US"`) for 5 GHz Wi-Fi.
 
 USB-C is built but not yet tested ([docs/TODO.md](docs/TODO.md)).
+
+The mini adds GravityLinux-derived HDMI, all five USB ports (the front pair
+share a hub), on-board Ethernet, radio firmware selection and GPU/PMP handoff.
+Installation and boot have been reported working on J773G. Audio, USB4 and
+USB-C displays remain disabled; the Air's support is unchanged.
 
 Not supported: speakers, headphones, external displays, suspend. Closing the lid powers off. Sustained writes of
 several GB can crash the storage controller; see
@@ -51,7 +56,8 @@ The installer registers m1n1 stage 1 in a small macOS stub, which loads
 and an initrd with the Apple firmware the installer collected. Every
 `nixos-rebuild boot|switch` runs [`firn-boot`](pkgs/firn-boot/firn-boot.py),
 which writes the generation's m1n1, kernel, devicetree, initrd and parameters
-in the same layout and keeps the firmware. It refuses any board but J713.
+in the same layout and keeps the firmware. It accepts J713 and J773G and
+refuses to switch the installed board's devicetree.
 The installer's file is kept as `boot.bin.original`, the last one as `boot.bin.previous`.
 The installer's other files on that partition move to
 `/var/lib/firn/installer/`, to leave room for them.
@@ -64,6 +70,16 @@ The kernel and m1n1 cross-compile on x86_64:
 nix build .#packages.x86_64-linux.linux
 nix build .#checks.x86_64-linux.policy .#checks.x86_64-linux.kernel-modules
 ```
+
+Both boards use the same kernel. Select `hardware.firn.board = "j713"` or
+`"j773g"`; the default remains J713 for existing configurations.
+
+| Board | NixOS configuration | Installer kit package |
+|---|---|---|
+| J713 | `.#j713` | `.#packages.x86_64-linux.kit-j713` |
+| J773G | `.#j773g` | `.#packages.x86_64-linux.kit-j773g` |
+
+The existing `minimal` and `kit` names remain aliases for J713.
 
 The rest of the system needs an aarch64 builder, or
 `boot.binfmt.emulatedSystems = [ "aarch64-linux" ]` on the build machine.

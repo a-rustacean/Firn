@@ -30,11 +30,12 @@ runCommand "firn-kit-${cfg.system.nixos.label}"
     python3 -I ${./make-kit.py} \
       --installer ${installer} \
       --installer-src ${installer.src} \
+      --board ${cfg.hardware.firn.board} \
       --firn-boot ${../firn-boot/firn-boot.py} \
       --root-image root.ext4 \
       --loader ${toplevel}/m1n1.bin \
       --kernel ${toplevel}/kernel \
-      --dtb ${toplevel}/dtbs/apple/t8132-j713.dtb \
+      --dtb ${toplevel}/dtbs/apple/t8132-${cfg.hardware.firn.board}.dtb \
       --initrd ${toplevel}/initrd \
       --kernel-params ${toplevel}/kernel-params \
       --init ${toplevel}/init \

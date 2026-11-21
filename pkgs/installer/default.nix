@@ -92,7 +92,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   '';
 
   meta = {
-    description = "macOS-side installer for Firn on the 13-inch M4 MacBook Air";
+    description = "macOS-side installer for Firn on the M4 MacBook Air and Mac mini";
     license = lib.licenses.mit;
   };
 })
