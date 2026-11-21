@@ -174,7 +174,7 @@ less ~/report-1.txt
 Check in the report:
 
 - `failed units` is empty;
-- `uname` shows `7.4.0-rc1-firn`;
+- `uname` shows `7.3.0-firn`;
 - CPU frequency tops out at 1800 MHz (P cores) and 2172 MHz (E cores);
 - every speaker and headphone driver is `not loaded`;
 - temperatures at idle are well below 80 C;

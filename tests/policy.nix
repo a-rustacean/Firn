@@ -13,8 +13,8 @@ let
     "the Mac mini has both on-board Ethernet drivers" =
       cfg.hardware.firn.board != "j773g"
       || (kernel.config.CONFIG_TIGON3 or "n") == "m" && (kernel.config.CONFIG_AQTION or "n") == "m";
-    "kernel is this repository's source build" = kernel.modDirVersion == "7.4.0-rc1-firn";
-    "the kernel builds no speaker codec driver, nor Asahi's pre-M4 GPU driver" =
+    "kernel is this repository's Gravity source build" = kernel.modDirVersion == "7.3.0-firn";
+    "the kernel builds no speaker codec driver" =
       lib.all
         (
           option:
@@ -24,7 +24,6 @@ let
           ])
         )
         [
-          "DRM_ASAHI"
           "SND_SOC_TAS2764"
           "SND_SOC_TAS2770"
           "SND_SOC_APPLE_MCA"
@@ -47,7 +46,8 @@ let
       cfg.boot.loader.external.enable && !cfg.boot.loader.grub.enable;
     "no audio server is enabled" =
       !cfg.services.pipewire.enable && !(cfg.services.pulseaudio.enable or false);
-    "the GPU driver is built" = (kernel.config.CONFIG_DRM_ASAHI_M4 or "n") == "m";
+    "the GPU driver is built" = (kernel.config.CONFIG_DRM_ASAHI or "n") == "m";
+    "experimental memory/fabric voting is off" = lib.elem "apple_pmp_report.cpu_vote=0" params;
     "graphics are on, with Firn's Mesa" =
       cfg.hardware.graphics.enable && cfg.hardware.graphics.package == cfg.hardware.firn.mesa;
   };

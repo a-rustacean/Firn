@@ -4,7 +4,11 @@
   config = lib.mkIf config.hardware.firn.enable {
     boot.kernelModules = [ "apple_soc_cpufreq" ];
     # Lets the Wi-Fi and Bluetooth link enter L1.2 when idle.
-    boot.kernelParams = [ "pcie_aspm.policy=powersupersave" ];
+    boot.kernelParams = [
+      "pcie_aspm.policy=powersupersave"
+      # Gravity's memory/fabric vote touches CPM registers; not qualified here.
+      "apple_pmp_report.cpu_vote=0"
+    ];
 
     # The gains power_allocator estimates for the hot spot limit-cycle
     # between 95 and 115 C. These hold it at 105 C with a single overshoot.

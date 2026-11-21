@@ -5,11 +5,14 @@ NixOS on the 13-inch M4 MacBook Air (Mac16,12 / J713) and M4 Mac mini
 
 Everything that runs on the Air is built from source here:
 
-- the kernel: mainline Linux with shared T8132 and board-specific patches, each patch
-  credited to its authors;
-- m1n1 stage 1 and stage 2: upstream m1n1 with Firn's patches;
+- the kernel: Gravity Linux's latest integration, with Firn's remaining
+  boot, safety and thermal changes;
+- m1n1 stage 1 and stage 2: Gravity Linux's bootloader with Firn's patches;
 - Mesa: Gravity Linux's, whose asahi drivers support the M4's GPU;
-- the macOS-side installer: Gravity Linux's installer with the J713 added.
+- the macOS-side installer: Gravity Linux's J713/J773G installer branch,
+  with Firn's boot-payload format.
+
+Exact source revisions and remaining patches are listed in [docs/SOURCES.md](docs/SOURCES.md).
 
 The installer runs under python.org's Python for macOS and Homebrew's libffi,
 both pinned by hash, as Asahi Linux's own installer does.
@@ -95,9 +98,11 @@ git tree leaves untracked files out, so build the system with
 
 ## Provenance
 
-Patches keep their authors. Upstream kernel patches are as posted, and
-changes from [Omarchy-M4-Native](https://github.com/Kb2uka/Omarchy-M4-Native)
-are credited to KB2UKA, in the kernel series and in m1n1's patches.
+The former exported kernel series, its authors and imported sign-offs are
+preserved in commit `9b58444`. The Gravity-based downstream delta and its
+provenance are described in [docs/SOURCES.md](docs/SOURCES.md). Changes from
+[Omarchy-M4-Native](https://github.com/Kb2uka/Omarchy-M4-Native) retain their
+credits in that history and in m1n1's patches.
 Some imported commits, most of them in the GPU series from Gravity Linux,
 do not yet carry their authors' `Signed-off-by`; they are listed in
 [docs/TODO.md](docs/TODO.md) and are not ready to send upstream until

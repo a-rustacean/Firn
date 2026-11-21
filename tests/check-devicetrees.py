@@ -19,6 +19,8 @@ def check(directory):
         dtb = Path(directory, f't8132-{board}.dtb')
         mini = board == 'j773g'
         assert get(dtb, '/', 'compatible').split()[0] == 'apple,' + board
+        for alias in ('dcpext0', 'dcpext1'):
+            assert get(dtb, '/aliases', alias, optional=True) is None
         assert get(dtb, '/aliases', 'ethernet0', optional=True) == (
             '/soc/pcie@1cb0000000/pci@2,0/ethernet@0,0' if mini else None)
         for device in ('wifi@0,0', 'bluetooth@0,1'):
@@ -48,6 +50,10 @@ def check(directory):
             assert get(dtb, dcp, 'dp2hdmi-pwren-gpios', 'x')[1:] == [26, 0]
         else:
             assert get(dtb, '/soc/dcp@30ae00000/panel', 'compatible').startswith('apple,panel-j713 ')
+            assert get(dtb, '/thermal-zones/cpu-thermal/trips/cpu-control',
+                       'temperature', 'x') == [105000]
+            assert get(dtb, '/thermal-zones/chassis-thermal/trips/chassis-control',
+                       'temperature', 'x') == [45000]
 
         # Firmware-backed devices must stay disabled until m1n1 supplies state.
         for alias in ('gpu', 'pmp'):

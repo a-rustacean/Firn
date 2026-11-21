@@ -18,6 +18,7 @@ let
     "apple,spi.yaml"
     "apple,spmi.yaml"
     "apple,smc.yaml"
+    "apple,smc-hwmon.yaml"
     "apple,pcie.yaml"
     "apple,dwc3.yaml"
     "apple,mailbox.yaml"
@@ -32,21 +33,10 @@ let
     "apple,pmp-report.yaml"
     "ti,tps6598x.yaml"
   ];
-  # Nodes whose bindings are not written yet (docs/TODO.md).
-  commonWarnings = ''
-    /soc/dcp@30ae00000: failed to match any schema with compatible: ['apple,t8132-dcp', 'apple,dcp']
-    /soc/fifo@394b14000: failed to match any schema with compatible: ['apple,t8132-dockchannel', 'apple,dockchannel']
-    /soc/fifo@394b14000/input@0: failed to match any schema with compatible: ['apple,t8132-dockchannel-hid', 'apple,dockchannel-hid']
-    /soc/mtp@394600000: failed to match any schema with compatible: ['apple,t8132-mtp', 'apple,t8132-rtk-helper-asc4', 'apple,mtp', 'apple,rtk-helper-asc4']
-    /soc/phy@39a700000: failed to match any schema with compatible: ['apple,t8132-dptx-phy', 'apple,dptx-phy']
-  '';
-  expectedAir = pkgs.writeText "expected-j713-warnings" (
-    commonWarnings
-    + ''
-      /soc/dcp@30ae00000/panel: failed to match any schema with compatible: ['apple,panel-j713', 'apple,panel']
-    ''
-  );
-  expectedMini = pkgs.writeText "expected-j773g-warnings" commonWarnings;
+  # Reviewed warnings in the pinned Gravity tree, including disabled camera,
+  # audio and USB4 descriptions. Any change to this baseline still fails.
+  expectedAir = ./devicetree-warnings/j713;
+  expectedMini = ./devicetree-warnings/j773g;
 in
 pkgs.runCommandCC "firn-devicetree-schema"
   {
@@ -75,6 +65,7 @@ pkgs.runCommandCC "firn-devicetree-schema"
       exit 1
     fi
     mkdir -p $out
+    failed=0
     for board in j713 j773g; do
       cp ../binding-output ../output
       if ! make -s ARCH=arm64 CHECK_DTBS=y apple/t8132-$board.dtb >> ../output 2>&1; then
@@ -89,9 +80,10 @@ pkgs.runCommandCC "firn-devicetree-schema"
       esac
       if ! diff -u <(sort -u "$expected") ../warnings; then
         echo "dt-schema reports unexpected warnings for $board." >&2
-        exit 1
+        failed=1
       fi
       cp ../warnings $out/$board
     done
     python3 ${./check-devicetrees.py} arch/arm64/boot/dts/apple
+    test "$failed" -eq 0
   ''

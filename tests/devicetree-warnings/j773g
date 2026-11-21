@@ -1,0 +1,27 @@
+/soc/audio-controller-1: failed to match any schema with compatible: ['apple,t8132-dpaudio', 'apple,dpaudio']
+/soc/audio-controller-2: failed to match any schema with compatible: ['apple,t8132-dpaudio', 'apple,dpaudio']
+/soc/audio-controller: failed to match any schema with compatible: ['apple,t8132-dpaudio', 'apple,dpaudio']
+/soc/cio@401ac0000/nhi@401f00000: failed to match any schema with compatible: ['apple,t8132-usb4-nhi', 'apple,t8103-usb4-nhi']
+/soc/cio@401ac0000/pcie@1c50000000: failed to match any schema with compatible: ['apple,t8132-pcie-tunnel']
+/soc/cio@401ac0000: failed to match any schema with compatible: ['apple,t8132-usb4-acio', 'apple,t8103-usb4-acio']
+/soc/cio@409ac0000/nhi@409f00000: failed to match any schema with compatible: ['apple,t8132-usb4-nhi', 'apple,t8103-usb4-nhi']
+/soc/cio@409ac0000/pcie@1c60000000: failed to match any schema with compatible: ['apple,t8132-pcie-tunnel']
+/soc/cio@409ac0000: failed to match any schema with compatible: ['apple,t8132-usb4-acio', 'apple,t8103-usb4-acio']
+/soc/cio@419ac0000/nhi@419f00000: failed to match any schema with compatible: ['apple,t8132-usb4-nhi', 'apple,t8103-usb4-nhi']
+/soc/cio@419ac0000/pcie@1c80000000: failed to match any schema with compatible: ['apple,t8132-pcie-tunnel']
+/soc/cio@419ac0000: failed to match any schema with compatible: ['apple,t8132-usb4-acio', 'apple,t8103-usb4-acio']
+/soc/dcp@286e00000: failed to match any schema with compatible: ['apple,t8132-dcpext', 'apple,dcpext']
+/soc/dcp@30ae00000: failed to match any schema with compatible: ['apple,t8132-dcp', 'apple,dcp']
+/soc/dcp@48ae00000: failed to match any schema with compatible: ['apple,t8132-dcpext', 'apple,dcpext']
+/soc/display-subsystem: failed to match any schema with compatible: ['apple,display-subsystem']
+/soc/mux@40b04c000: failed to match any schema with compatible: ['apple,t8132-display-crossbar', 'apple,t6020-display-crossbar']
+/soc/mux@41b04c000: failed to match any schema with compatible: ['apple,t8132-display-crossbar', 'apple,t6020-display-crossbar']
+/soc/phy@39a700000: failed to match any schema with compatible: ['apple,t8122-dptx-phy', 'apple,dptx-phy']
+/soc/pmp-report@3803c0000: failed to match any schema with compatible: ['apple,t8132-pmp-v2-report']
+/soc/pmp@380500000: failed to match any schema with compatible: ['apple,t8132-pmp-v2', 'apple,t6000-pmp-v2']
+/soc/syscon@380780000/reset-controller@8: failed to match any schema with compatible: ['apple,t8132-cio-reset', 'apple,t6000-cio-reset']
+reset-controller@8 (apple,t8132-cio-reset): compatible: 'oneOf' conditional failed, one must be fixed:
+syscon@380725000 (syscon): compatible: ['syscon'] is too short
+syscon@380780000 (syscon): compatible: ['syscon', 'simple-mfd'] is too short
+syscon@38079c000 (syscon): compatible: ['syscon'] is too short
+syscon@3828a0000 (syscon): compatible: ['syscon'] is too short

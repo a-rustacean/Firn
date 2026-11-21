@@ -10,7 +10,7 @@ macsmc_power
 macsmc_reboot
 nvme_apple
 pmp
-pmp_report
+apple_pmp_report
 pwm_apple
 leds_pwm
 rtc_macsmc

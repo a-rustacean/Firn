@@ -6,7 +6,7 @@ J713) and M4 Mac mini (Mac16,10 / J773G). Each kit targets one board;
 off. Installation and boot have been reported working on the mini; the Air
 retains its existing CPU and GPU thermal limits.
 
-The installer is Gravity Linux's installer with the J713 added, built by
+The installer is Gravity Linux's J713/J773G installer, built and adapted by
 the Firn project. Firn is not made, endorsed or supported by Gravity
 Linux, Asahi Linux or Apple.
 

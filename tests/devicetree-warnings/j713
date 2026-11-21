@@ -1,0 +1,45 @@
+/soc/aop@390c00000/audio: failed to match any schema with compatible: ['apple,t8132-aop-audio', 'apple,t6030-aop-audio']
+/soc/aop@390c00000/las: failed to match any schema with compatible: ['apple,t8132-aop-las', 'apple,aop-las']
+/soc/aop@390c00000: failed to match any schema with compatible: ['apple,t8132-aop', 'apple,t6020-aop']
+/soc/audio-controller-1: failed to match any schema with compatible: ['apple,t8132-dpaudio', 'apple,dpaudio']
+/soc/audio-controller-2: failed to match any schema with compatible: ['apple,t8132-dpaudio', 'apple,dpaudio']
+/soc/audio-controller: failed to match any schema with compatible: ['apple,t8132-dpaudio', 'apple,dpaudio']
+/soc/cio@401ac0000/nhi@401f00000: failed to match any schema with compatible: ['apple,t8132-usb4-nhi', 'apple,t8103-usb4-nhi']
+/soc/cio@401ac0000/pcie@1c50000000: failed to match any schema with compatible: ['apple,t8132-pcie-tunnel']
+/soc/cio@401ac0000: failed to match any schema with compatible: ['apple,t8132-usb4-acio', 'apple,t8103-usb4-acio']
+/soc/cio@409ac0000/nhi@409f00000: failed to match any schema with compatible: ['apple,t8132-usb4-nhi', 'apple,t8103-usb4-nhi']
+/soc/cio@409ac0000/pcie@1c60000000: failed to match any schema with compatible: ['apple,t8132-pcie-tunnel']
+/soc/cio@409ac0000: failed to match any schema with compatible: ['apple,t8132-usb4-acio', 'apple,t8103-usb4-acio']
+/soc/dcp@286e00000: failed to match any schema with compatible: ['apple,t8132-dcpext', 'apple,dcpext']
+/soc/dcp@30ae00000/panel: failed to match any schema with compatible: ['apple,panel-j713', 'apple,panel']
+/soc/dcp@30ae00000: failed to match any schema with compatible: ['apple,t8132-dcp', 'apple,dcp']
+/soc/dcp@48ae00000: failed to match any schema with compatible: ['apple,t8132-dcpext', 'apple,dcpext']
+/soc/display-subsystem: failed to match any schema with compatible: ['apple,display-subsystem']
+/soc/fifo@394b14000/input@0: failed to match any schema with compatible: ['apple,t8132-dockchannel-hid', 'apple,dockchannel-hid']
+/soc/fifo@394b14000: failed to match any schema with compatible: ['apple,t8132-dockchannel', 'apple,dockchannel']
+/soc/isp@48c000000: failed to match any schema with compatible: ['apple,t8132-isp']
+/soc/mtp@394600000: failed to match any schema with compatible: ['apple,t8132-mtp', 'apple,t8132-rtk-helper-asc4', 'apple,mtp', 'apple,rtk-helper-asc4']
+/soc/mux@40304c000: failed to match any schema with compatible: ['apple,t8132-display-crossbar', 'apple,t6020-display-crossbar']
+/soc/mux@40b04c000: failed to match any schema with compatible: ['apple,t8132-display-crossbar', 'apple,t6020-display-crossbar']
+/soc/phy@39a700000: failed to match any schema with compatible: ['apple,t8122-dptx-phy', 'apple,dptx-phy']
+/soc/pmp-report@3803c0000: failed to match any schema with compatible: ['apple,t8132-pmp-v2-report']
+/soc/pmp@380500000: failed to match any schema with compatible: ['apple,t8132-pmp-v2', 'apple,t6000-pmp-v2']
+/soc/syscon@380780000/reset-controller@8: failed to match any schema with compatible: ['apple,t8132-cio-reset', 'apple,t6000-cio-reset']
+amplifier@38 (ti,sn012776): Unevaluated properties are not allowed ('SDZ-supply' was unexpected)
+amplifier@38 (ti,sn012776): compatible: ['ti,sn012776', 'ti,tas2764'] is too long
+amplifier@39 (ti,sn012776): Unevaluated properties are not allowed ('SDZ-supply' was unexpected)
+amplifier@39 (ti,sn012776): compatible: ['ti,sn012776', 'ti,tas2764'] is too long
+amplifier@3b (ti,sn012776): Unevaluated properties are not allowed ('SDZ-supply' was unexpected)
+amplifier@3b (ti,sn012776): compatible: ['ti,sn012776', 'ti,tas2764'] is too long
+amplifier@3c (ti,sn012776): Unevaluated properties are not allowed ('SDZ-supply' was unexpected)
+amplifier@3c (ti,sn012776): compatible: ['ti,sn012776', 'ti,tas2764'] is too long
+i2s@393600000 (apple,t8132-mca): dma-names:1: 'rx0b' is not one of ['tx0a', 'tx1a', 'tx2a', 'tx3a', 'tx4a', 'tx5a']
+iommu@48e8c0000 (apple,t8132-dart): 'apple,bypass-sids', 'apple,dapf-ranges', 'reg-names' do not match any of the regexes: '^pinctrl-[0-9]+$'
+iommu@48e8c0000 (apple,t8132-dart): reg: [[4, 2391539712, 0, 49152], [4, 2391605248, 0, 16384]] is too long
+iommu@48e8e0000 (apple,t8132-dart): 'apple,bypass-sids' does not match any of the regexes: '^pinctrl-[0-9]+$'
+iommu@48e900000 (apple,t8132-dart): 'apple,bypass-sids' does not match any of the regexes: '^pinctrl-[0-9]+$'
+reset-controller@8 (apple,t8132-cio-reset): compatible: 'oneOf' conditional failed, one must be fixed:
+syscon@380725000 (syscon): compatible: ['syscon'] is too short
+syscon@380780000 (syscon): compatible: ['syscon', 'simple-mfd'] is too short
+syscon@38079c000 (syscon): compatible: ['syscon'] is too short
+syscon@3828a0000 (syscon): compatible: ['syscon'] is too short

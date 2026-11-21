@@ -29,7 +29,7 @@ let
 in
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "firn-installer";
-  version = "0-unstable-2026-10-02";
+  version = "0-unstable-2026-11-11";
 
   src = callPackage ./source.nix { };
 

@@ -14,16 +14,16 @@
 }:
 (linuxKernel.manualConfig {
   inherit randstructSeed features configfile;
-  version = "7.4.0-rc1";
+  version = "7.3.0";
   # Must match CONFIG_LOCALVERSION.
-  modDirVersion = "7.4.0-rc1-firn";
+  modDirVersion = "7.3.0-firn";
 
-  # Mainline 7.4-rc1.
+  # Latest Gravity integration/apple-silicon-7.3-20261119-526 snapshot.
   src = fetchFromGitHub {
-    owner = "torvalds";
+    owner = "GravityLinux";
     repo = "linux";
-    rev = "6628e7d4c6b25c8d18f1345e3a20d21829aae7e4";
-    hash = "sha256-OkOggNsjb5JSC5DW2i6Icauj+j4enfwBUjrms9LCVBY=";
+    rev = "c7e7b86aed0c4c052851e5c3b2c02088c0602f02";
+    hash = "sha256-c+fOJqeqqwiHs9Cdz0RVZ/nReLgh0VEF3iEbGuq6o4E=";
   };
 
   # Shared T8132 support and board-local J713/J773G enablement.

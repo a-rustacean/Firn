@@ -3,6 +3,10 @@
 Open work, most pressing first. Known problems with the current system are
 in [ISSUES.md](ISSUES.md).
 
+The kernel backlog below originated with Firn's mainline port. Recheck it
+against the current Gravity snapshots in [SOURCES.md](SOURCES.md) before
+starting a port or requesting upstream sign-offs for an old exported patch.
+
 ## Check on the Air
 
 - [ ] USB-C: both left ports in both orientations, USB 2 and USB 3 devices,
@@ -101,7 +105,7 @@ in [ISSUES.md](ISSUES.md).
 
 ## Upstreaming
 
-- [ ] Review and human sign-off for the J773G additions (0614–0622),
+- [ ] Review and human sign-off for the remaining downstream changes,
       including the new fixed-link/GPIO bindings and the unsigned original
       PCIe description. Imported sign-offs describe the source commits,
       not certification of Firn's adaptations. Hardware validation and the
