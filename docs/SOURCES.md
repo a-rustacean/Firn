@@ -16,6 +16,9 @@ including their separate radio firmware profiles. Mesa was already current.
 
 ## Downstream changes
 
+The per-patch audit is in [PATCHES.md](PATCHES.md): what each patch
+carries, whether it is still needed, and why.
+
 The old 622-patch reconstruction of mainline Linux is replaced by Gravity's
 tree and four patches containing the remaining Firn delta:
 
@@ -38,10 +41,11 @@ remaining patches are not ready for upstream submission without review.
 The installer no longer needs Firn's J713-enablement or expert-minimum
 patches: Gravity implements both. The payload-format extension, generic
 macOS firmware-file filtering and optional 27.2 recovery support remain.
-All nine m1n1 patches were checked against the new snapshot and still apply:
-ANS handling, memory reservations, GPU fallback/sensors and 27.2 recognition
-have not been incorporated there. Mesa's patch is Nix-specific library
-discovery, not a duplicate hardware driver change.
+All nine m1n1 patches were checked against the new snapshot and still apply
+(see [PATCHES.md](PATCHES.md)): ANS handling, memory reservations, GPU
+fallback/sensors and 27.2 recognition have not been incorporated there.
+Mesa's patch is Nix-specific library discovery, not a duplicate hardware
+driver change.
 
 Gravity's GPU configuration symbol is `DRM_ASAHI`; its M4 module remains
 `asahi_m4`. The PMP report driver is now `apple_pmp_report`, including the

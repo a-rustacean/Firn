@@ -64,7 +64,7 @@
       type = lib.types.path;
       default = ../pkgs/linux/j713.config;
       internal = true;
-      description = "Kernel configuration; the VM boot test swaps in j713-vm.config.";
+      description = "Kernel configuration; the VM boot test swaps in tests/vm/j713-vm.config.";
     };
   };
 

@@ -2,3 +2,17 @@ result
 result-*
 __pycache__/
 examples/minimal/access.nix
+
+# Kit outputs copied into the repository root.
+/BUILD-REPORT.json
+/GUIDE.md
+/Install.command
+/SHA256SUMS
+/START-HERE.md
+/board
+/installer.tar.gz
+/installer_data.json
+/kit-*/
+/notices/
+/os/
+/preflight.command

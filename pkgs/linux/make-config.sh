@@ -4,8 +4,8 @@
 # means a missing dependency or a renamed option. Pass the toolchain the
 # kernel is built with, since some options depend on it:
 #   make-config.sh KERNEL_TREE OUT [--with FRAGMENT]... [LLVM=1 | CROSS_COMPILE=...]
-# --with adds a fragment after config/*.config, such as qemu-virt.config
-# for j713-vm.config.
+# --with adds a fragment after config/*.config, such as
+# tests/vm/qemu-virt.config for tests/vm/j713-vm.config.
 set -euo pipefail
 
 src=$(realpath "$1")

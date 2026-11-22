@@ -14,7 +14,7 @@ Test tiers, in order. Do not go on past a failed gate.
 | T5 GPU | Air | [GPU.md](GPU.md), "In Firn" | `renderD128` and the `gpu` cooling device exist; eglclear exact; vkmark, kmscube and OpenCL as listed there |
 
 T2 boots the shipped initrd in QEMU's virtual arm64 machine, on the J713 kernel
-plus the drivers that machine needs (`pkgs/linux/qemu-virt.config`). It tests
+plus the drivers that machine needs (`tests/vm/qemu-virt.config`). It tests
 the software path, not Apple hardware. Its EFI partition is on a separate
 virtual disk, so it cannot catch anything that depends on the Mac's single
 disk layout, such as systemd's GPT auto-mounting.

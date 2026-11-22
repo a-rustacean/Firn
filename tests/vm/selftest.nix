@@ -1,5 +1,7 @@
 # Adds a service and the drivers QEMU's virt machine needs, so the VM boots
-# the shipped initrd and parameters on the J713 kernel plus qemu-virt.config.
+# the shipped initrd and parameters on the J713 kernel plus
+# tests/vm/qemu-virt.config.
+# Both configs live beside this file; see README.md for how to regenerate them.
 {
   config,
   lib,
@@ -12,7 +14,7 @@ let
   firn-boot = pkgs.callPackage ../../pkgs/firn-boot { };
 in
 {
-  hardware.firn.kernelConfig = ../../pkgs/linux/j713-vm.config;
+  hardware.firn.kernelConfig = ./j713-vm.config;
 
   systemd.services.firn-selftest = {
     description = "Firn VM self-test";
